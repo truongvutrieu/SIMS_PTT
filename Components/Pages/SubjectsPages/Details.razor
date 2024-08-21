@@ -1,0 +1,51 @@
+﻿@page "/subjects/details"
+
+@using Microsoft.EntityFrameworkCore
+@using BlazorApp3.Models
+@inject IDbContextFactory<BlazorApp3.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h4>Subjects</h4>
+    <hr />
+    @if (subjects is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Name</dt>
+            <dd class="col-sm-10">@subjects.Name</dd>
+            <dt class="col-sm-2">Major</dt>
+            <dd class="col-sm-10">@subjects.Major.Name</dd>
+            <dt class="col-sm-2">Code</dt>
+            <dd class="col-sm-10">@subjects.Code</dd>
+        </dl>
+        <div>
+            <a href="@($"/subjects/edit?id={subjects.Id}")">Edit</a> |
+            <a href="@($"/subjects")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    Subjects? subjects;
+
+    [SupplyParameterFromQuery]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        subjects = await context.Subjects.Include(m => m.Major).FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (subjects is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

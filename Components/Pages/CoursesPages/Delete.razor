@@ -1,0 +1,176 @@
+﻿@page "/courses/delete"
+
+@using Microsoft.EntityFrameworkCore
+@using BlazorApp3.Models
+@inject IDbContextFactory<BlazorApp3.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete</PageTitle>
+
+<div class="container">
+    <h1 class="page-title">Delete</h1>
+
+    <h3 class="section-title">Are you sure you want to delete this?</h3>
+    <div class="info-container">
+        <h4 class="section-title">Courses</h4>
+        <hr class="divider" />
+        @if (courses is null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="info-box">
+                        <dl class="row">
+                            <dt class="col-sm-4">Name</dt>
+                            <dd class="col-sm-8">@courses.Name</dd>
+                            <dt class="col-sm-4">StartDate</dt>
+                            <dd class="col-sm-8">@courses.StartDate</dd>
+                            <dt class="col-sm-4">EndDate</dt>
+                            <dd class="col-sm-8">@courses.EndDate</dd>
+                        </dl>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="info-box">
+                        <dl class="row">
+                            <dt class="col-sm-4">Semester</dt>
+                            <dd class="col-sm-8">@courses.Semester.Name</dd>
+                            <dt class="col-sm-4">Lecture</dt>
+                            <dd class="col-sm-8">@courses.Lecture.Name</dd>
+                            <dt class="col-sm-4">Subject</dt>
+                            <dd class="col-sm-8">@courses.Subject.Name</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="button-group">
+                <EditForm method="post" Model="courses" OnValidSubmit="DeleteCourses" FormName="delete" Enhance>
+                    <button type="submit" class="btn btn-danger" disabled="@(courses is null)">Delete</button>
+                </EditForm>
+                <a href="/courses" class="btn btn-success">Back to List</a>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    Courses? courses;
+
+    [SupplyParameterFromQuery]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        courses = await context.Courses.Include(m => m.Semester).Include(m => m.Subject).Include(m => m.Lecture).FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (courses is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    public async Task DeleteCourses()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Courses.Remove(courses!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/courses");
+    }
+}
+
+    <style>
+        .page-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #3424A8;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #3424A8;
+        }
+
+        .divider {
+            border-top: 2px solid #3424A8;
+            margin-bottom: 1rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .info-container {
+            padding: 1rem;
+            border: 1px solid #dcdcdc;
+            border-radius: 0.5rem;
+            background-color: #f9f9f9;
+        }
+
+        .info-box {
+            padding: 1rem;
+            border: 1px solid #dcdcdc;
+            border-radius: 0.5rem;
+            background-color: #fff;
+            margin-bottom: 1rem;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .col-md-6 {
+            flex: 0 0 50%;
+            max-width: 50%;
+            padding: 0 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            font-weight: bold;
+        }
+
+        .validation-summary {
+            margin-bottom: 1rem;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn-danger {
+            font-weight: bold;
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: #fff;
+        }
+
+            .btn-danger:hover {
+                background-color: #c82333;
+                border-color: #bd2130;
+            }
+
+        .btn-success {
+            font-weight: bold;
+            background-color: #28a745;
+            border-color: #28a745;
+            color: #fff;
+        }
+
+            .btn-success:hover {
+                background-color: #218838;
+                border-color: #1e7e34;
+            }
+    </style>

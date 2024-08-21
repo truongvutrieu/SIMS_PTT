@@ -1,0 +1,166 @@
+﻿@implements IDisposable
+@using BlazorApp3.Data
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Identity
+
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject SignInManager<ApplicationUser> SignInManager
+
+
+<div class="top-row ps-3 navbar navbar-dart">
+    <div class="container-fluid">
+        <a class="navbar-brand" href=""></a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <i class="fa-solid fa-house me-3" aria-hidden="true"></i> Home
+            </NavLink>
+        </div>
+        @if (isAdmin)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="semesters">
+                    <i class="fa-solid fa-list me-3"></i> Semesters
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="departments">
+                    <i class="fa-solid fa-calendar-days me-3"></i> Departments
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="majors">
+                    <i class="fa-solid fa-layer-group me-3"></i> Majors
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="subjects">
+                    <i class="fa-solid fa-book me-3"></i> Subjects
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="lecturers">
+                    <i class="fa-solid fa-chalkboard-user me-3"></i> Lectures
+                </NavLink>
+            </div>
+        }
+        @if (isAdmin || isLecture)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="courses">
+                    <i class="fa-regular fa-folder-open me-3"></i> Courses
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="students">
+                    <i class="bi fa-solid fa-graduation-cap"></i> Students
+                </NavLink>
+            </div>
+        }
+        @if (isStudent)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="courses/my-course">
+                    <i class="bi fa-solid fa-graduation-cap"></i> My course
+                </NavLink>
+            </div>
+        }
+
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Account/Manage">
+                        <span class="fa-solid fa-user me-3" aria-hidden="true"></span> @context.User.Identity?.Name
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Account/Signout">
+                        <span class="fa-solid fa-right-from-bracket me-3" aria-hidden="true"></span>
+                        Logout
+                    </NavLink>
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Account/Register">
+                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Account/Login">
+                        <span class="fa-solid fa-right-to-bracket me-3" aria-hidden="true"></span> Login
+                    </NavLink>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
+    </nav>
+</div>
+
+
+@code {
+    private string? currentUrl;
+    public static bool isStudent;
+    public static bool isAdmin;
+    public static bool isLecture;
+    public static string? userId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        userId = user.FindFirst(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+            ?? user.FindFirst(c => c.Type == "sub")?.Value;
+        // Check if the user is in the "Student" role
+        isStudent = user.Claims.Any(c => c.Type == "Role" && c.Value == "Student");
+        isAdmin = user.Claims.Any(c => c.Type == "Role" && c.Value == "Admin");
+        isLecture = user.Claims.Any(c => c.Type == "Role" && c.Value == "Lecture");
+
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}
+
+        <style>
+
+        .nav-scrollable {
+            background: linear-gradient(to bottom, #00004D, #330033);
+        }
+
+        .nav-item {
+            border-bottom: 1px solid #330033;
+        }
+
+        .nav-link {
+            color: #FFFFFF;
+        }
+
+            .nav-link:hover {
+                background-color: #330033;
+                color: #FFFFFF;
+            }
+
+        .nav-item .fa, .nav-item .bi {
+            color: #FFFFFF;
+        }
+        </style>

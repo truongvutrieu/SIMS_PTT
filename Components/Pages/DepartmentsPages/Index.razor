@@ -1,0 +1,26 @@
+﻿@page "/departments"
+
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using BlazorApp3.Models
+@inject IDbContextFactory<BlazorApp3.Data.ApplicationDbContext> DbFactory
+@using Microsoft.AspNetCore.Authorization
+
+
+<PageTitle>Index</PageTitle>
+
+<h1>Departments</h1>
+
+<p>
+    <a href="departments/create"><i class="fa-solid fa-square-plus"></i></a>
+</p>
+
+<QuickGrid Class="table" Items="DbFactory.CreateDbContext().Departments">
+    <PropertyColumn Property="departments => departments.Name" />
+
+    <TemplateColumn Context="departments">
+        <a href="@($"departments/edit?id={departments.Id}")"><i class="fa-solid fa-pen-to-square"></i></a> |
+        <a href="@($"departments/details?id={departments.Id}")"><i class="fa-solid fa-circle-info"></i></a> |
+        <a href="@($"departments/delete?id={departments.Id}")"><i class="fa-solid fa-trash"></i></a>
+    </TemplateColumn>
+</QuickGrid>

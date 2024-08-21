@@ -1,0 +1,26 @@
+﻿@page "/subjects"
+
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using BlazorApp3.Models
+@inject IDbContextFactory<BlazorApp3.Data.ApplicationDbContext> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Subjects</h1>
+
+<p>
+    <a href="subjects/create"><i class="fa-solid fa-square-plus"></i></a>
+</p>
+
+<QuickGrid Class="table" Items="DbFactory.CreateDbContext().Subjects.Include(m => m.Major)">
+    <PropertyColumn Property="subjects => subjects.Name" />
+    <PropertyColumn Property="subjects => subjects.Major.Name" Title="Major" />
+    <PropertyColumn Property="subjects => subjects.Code" />
+
+    <TemplateColumn Context="subjects">
+        <a href="@($"subjects/edit?id={subjects.Id}")"><i class="fa-solid fa-pen-to-square"></i></a> |
+        <a href="@($"subjects/details?id={subjects.Id}")"><i class="fa-solid fa-circle-info"></i></a> |
+        <a href="@($"subjects/delete?id={subjects.Id}")"><i class="fa-solid fa-trash"></i></a>
+    </TemplateColumn>
+</QuickGrid>

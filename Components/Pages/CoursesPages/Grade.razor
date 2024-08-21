@@ -1,0 +1,226 @@
+﻿@page "/courses/grade"
+
+@using Microsoft.EntityFrameworkCore
+@using BlazorApp3.Models
+@inject IDbContextFactory<BlazorApp3.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+<PageTitle>Add Grades</PageTitle>
+
+<div class="page-header">
+    <h1>Add Grades</h1>
+    <a class="btn btn-success" href="/courses">Back</a>
+</div>
+
+@if (showNotification)
+{
+    <div class="notification">Grades and Notes have been successfully saved!</div>
+}
+
+<hr />
+
+@if (courses is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-6 card">
+            <div class="card-header">Course Information</div>
+            <dl class="row">
+                <dt class="col-sm-4">Name:</dt>
+                <dd class="col-sm-8">@courses.Name</dd>
+                <dt class="col-sm-4">Start Date:</dt>
+                <dd class="col-sm-8">@courses.StartDate</dd>
+                <dt class="col-sm-4">End Date:</dt>
+                <dd class="col-sm-8">@courses.EndDate</dd>
+            </dl>
+        </div>
+        <div class="col-md-6 card">
+            <div class="card-header">Additional Information</div>
+            <dl class="row">
+                <dt class="col-sm-4">Semester:</dt>
+                <dd class="col-sm-8">@courses.Semester.Name</dd>
+                <dt class="col-sm-4">Lecture:</dt>
+                <dd class="col-sm-8">@courses.Lecture.Name</dd>
+                <dt class="col-sm-4">Subject:</dt>
+                <dd class="col-sm-8">@courses.Subject.Name</dd>
+            </dl>
+        </div>
+    </div>
+}
+
+<hr />
+
+<div class="card">
+    <div class="card-header">List of Students Enrolled</div>
+    <div class="table-container">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th class="text-center">No</th>
+                    <th class="text-center">Code</th>
+                    <th class="text-center">Name</th>
+                    <th class="text-center">Email</th>
+                    <th class="text-center">Grade</th>
+                    <th class="text-center">Note</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (StudentCourses != null && StudentCourses.Count > 0)
+                {
+                    int i = 1;
+                    @foreach (var student in StudentCourses)
+                    {
+                        <tr>
+                            <td class="text-center">@i</td>
+                            <td class="text-center">@student.Student.Code</td>
+                            <td class="text-center">@student.Student.Name</td>
+                            <td class="text-center">@student.Student.Email</td>
+                            <td class="text-center">
+                                <input type="text" @bind="student.Grade" class="form-control" placeholder="Grade" />
+                            </td>
+                            <td class="text-center">
+                                <input type="text" @bind="student.Note" class="form-control" placeholder="Note" />
+                            </td>
+                        </tr>
+                        i++;
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="text-center">No data!</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="d-flex justify-content-end mt-3">
+    <button class="btn btn-primary" @onclick="SaveGradesAndNotes">Save Grades and Notes</button>
+</div>
+
+@code {
+    Courses? courses;
+    private bool showNotification = false;
+
+    [SupplyParameterFromQuery]
+    public int Id { get; set; }
+
+    public List<StudentCourse> StudentCourses { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        courses = await context.Courses
+            .Include(m => m.Semester)
+            .Include(m => m.Subject)
+            .Include(m => m.Lecture)
+            .FirstOrDefaultAsync(m => m.Id == Id);
+
+        StudentCourses = await context.StudentCourses
+            .Where(course => course.CourseId == Id)
+            .Include(student => student.Student)
+            .ToListAsync();
+
+        if (courses is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task SaveGradesAndNotes()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        foreach (var studentCourse in StudentCourses)
+        {
+            var existingStudentCourse = await context.StudentCourses
+                .FirstOrDefaultAsync(sc => sc.CourseId == Id && sc.StudentId == studentCourse.StudentId);
+
+            if (existingStudentCourse != null)
+            {
+                existingStudentCourse.Grade = studentCourse.Grade;
+                existingStudentCourse.Note = studentCourse.Note;
+            }
+        }
+
+        await context.SaveChangesAsync();
+        showNotification = true;
+        StateHasChanged();
+
+        // Hide the notification after a delay
+        await Task.Delay(3000);
+        showNotification = false;
+        StateHasChanged();
+    }
+}
+
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .notification {
+        margin-top: 20px;
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+        border-radius: 0.25rem;
+        padding: 10px;
+    }
+
+    .card {
+        border: 2px solid #dee2e6; /* Thay đổi độ dày và màu sắc đường viền */
+        border-radius: 0.25rem;
+        padding: 15px;
+        margin-bottom: 20px;
+        background-color: #ffffff; /* Màu nền của khung */
+    }
+
+    .card-header {
+        font-size: 1.25rem;
+        font-weight: 500;
+        border-bottom: 2px solid #dee2e6; /* Đường viền dưới tiêu đề */
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+    }
+
+    .table-container {
+        margin-top: 20px;
+    }
+
+    .form-control {
+        border-radius: 0.25rem;
+    }
+
+    .btn {
+        margin: 5px;
+    }
+
+    .btn-primary {
+        background-color: #3424A8;
+        border-color: #3424A8;
+    }
+
+        .btn-primary:hover {
+            background-color: #2a1f7d;
+            border-color: #2a1f7d;
+        }
+
+    .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+</style>

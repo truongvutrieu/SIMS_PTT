@@ -1,0 +1,68 @@
+﻿@page "/subjects/create"
+
+@using Microsoft.EntityFrameworkCore
+@using BlazorApp3.Models
+@inject IDbContextFactory<BlazorApp3.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1><i class="fa-solid fa-square-plus"></i></h1>
+
+<h4>Subjects</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Subjects" OnValidSubmit="AddSubjects" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+            <div class="mb-3">
+                <label for="name" class="form-label">Name:</label> 
+                <InputText id="name" @bind-Value="Subjects.Name" class="form-control" /> 
+                <ValidationMessage For="() => Subjects.Name" class="text-danger" /> 
+            </div>        
+           <div class="mb-3">
+               <label for="majorid" class="form-label">Major:</label>
+               <InputSelect id="majorid" @bind-Value="Subjects.MajorId"class="form-control">
+                   @foreach (var major in Majors)
+                    {
+                        <option value="@major.Id">@major.Name</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => Subjects.MajorId"class="text-danger" />
+           </div>          
+            <div class="mb-3">
+                <label for="code" class="form-label">Code:</label> 
+                <InputText id="code" @bind-Value="Subjects.Code" class="form-control" /> 
+                <ValidationMessage For="() => Subjects.Code" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/subjects">Back to List</a>
+</div>
+
+@code {
+
+    [SupplyParameterFromForm]
+    public Subjects Subjects { get; set; } = new();
+    public List<Majors> Majors { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Majors = await context.Majors.ToListAsync();
+    }
+
+    // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
+    public async Task AddSubjects()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Subjects.Add(Subjects);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/subjects");
+    }
+}

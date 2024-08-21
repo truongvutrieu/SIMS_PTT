@@ -1,0 +1,296 @@
+﻿@page "/courses/assign"
+
+@using Microsoft.EntityFrameworkCore
+@using BlazorApp3.Models
+@inject IDbContextFactory<BlazorApp3.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+@rendermode InteractiveServer
+<PageTitle>Assign Student into Course</PageTitle>
+
+<style>
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .card {
+        border: 1px solid #ddd; /* Đường viền của khung */
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Bóng mờ */
+        padding: 20px;
+        margin-bottom: 20px;
+        background-color: #ffffff; /* Màu nền của khung */
+    }
+
+    .card-header {
+        font-size: 1.5rem;
+        font-weight: 600;
+        border-bottom: 2px solid #3424A8; /* Đường viền dưới tiêu đề */
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        color: #3424A8; /* Màu tiêu đề */
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-control {
+        border-radius: 0.5rem;
+        border: 1px solid #ced4da;
+        box-shadow: none;
+        transition: border-color 0.2s ease-in-out;
+    }
+
+        .form-control:focus {
+            border-color: #3424A8;
+            box-shadow: 0 0 0 0.2rem rgba(54, 115, 198, 0.25);
+        }
+
+    .btn {
+        margin: 5px;
+    }
+
+    .btn-primary {
+        background-color: #3424A8;
+        border-color: #3424A8;
+    }
+
+        .btn-primary:hover {
+            background-color: #2a1f7d;
+            border-color: #2a1f7d;
+        }
+
+    .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+
+    .table-container {
+        margin-top: 20px;
+    }
+
+    .table-bordered {
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+    }
+
+        .table-bordered th, .table-bordered td {
+            border: 1px solid #dee2e6;
+        }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .alert {
+        margin-top: 15px;
+    }
+</style>
+
+<div class="container">
+    <div class="page-header">
+        <h1>Assign Student into Course</h1>
+        <a class="btn btn-success" href="/courses">Back</a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Course Information</div>
+        @if (courses is null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Name</dt>
+                        <dd class="col-sm-8">@courses.Name</dd>
+                        <dt class="col-sm-4">Start Date</dt>
+                        <dd class="col-sm-8">@courses.StartDate</dd>
+                        <dt class="col-sm-4">End Date</dt>
+                        <dd class="col-sm-8">@courses.EndDate</dd>
+                        <dt class="col-sm-4">Semester</dt>
+                        <dd class="col-sm-8">@courses.Semester.Name</dd>
+                        <dt class="col-sm-4">Lecture</dt>
+                        <dd class="col-sm-8">@courses.Lecture.Name</dd>
+                        <dt class="col-sm-4">Subject</dt>
+                        <dd class="col-sm-8">@courses.Subject.Name</dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">Enroll Students into Course</div>
+                        <div class="form-group">
+                            <label for="studentSelect">Select Student(s)</label>
+                            <select id="studentSelect" multiple class="form-control" style="width: 100%;"></select>
+                            <small class="form-text text-muted">Hold down Ctrl (or Command) to select multiple students.</small>
+                        </div>
+                        <button class="btn btn-primary mt-3" @onclick="EnrollStudents">Enroll</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="card">
+        <div class="card-header">List of Students Enrolled</div>
+        <div class="table-container">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th class="text-center">No</th>
+                        <th class="text-center">Code</th>
+                        <th class="text-center">Name</th>
+                        <th class="text-center">Email</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (StudentCourses != null && StudentCourses.Count > 0)
+                    {
+                        int i = 1;
+                        @foreach (StudentCourse student in StudentCourses)
+                        {
+                            <tr>
+                                <td class="text-center">@i</td>
+                                <td class="text-center">@student.Student.Code</td>
+                                <td class="text-center">@student.Student.Name</td>
+                                <td class="text-center">@student.Student.Email</td>
+                                <td class="text-center">
+                                    <button class="btn btn-danger btn-sm" @onclick="() => RemoveStudent(student.StudentId)">Remove</button>
+                                </td>
+                            </tr>
+                            i++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center">No data!</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+    Courses? courses;
+
+    [SupplyParameterFromQuery]
+    public int Id { get; set; }
+
+    public List<StudentCourse> StudentCourses { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        courses = await context.Courses
+            .Include(m => m.Semester)
+            .Include(m => m.Subject)
+            .Include(m => m.Lecture)
+            .FirstOrDefaultAsync(m => m.Id == Id);
+
+        StudentCourses = await context.StudentCourses
+            .Where(course => course.CourseId == Id)
+            .Include(student => student.Student)
+            .ToListAsync();
+
+        if (courses is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Task.Delay(500);
+            await JS.InvokeVoidAsync("initializeSelect2", Id);
+        }
+    }
+
+    private async Task EnrollStudents()
+    {
+        var selectedStudentIds = await JS.InvokeAsync<string[]>("getSelectedValues", "studentSelect");
+
+        if (selectedStudentIds != null && selectedStudentIds.Length > 0)
+        {
+            using var context = DbFactory.CreateDbContext();
+
+            foreach (var studentId in selectedStudentIds)
+            {
+                var studentCourse = new StudentCourse
+                    {
+                        CourseId = Id,
+                        StudentId = studentId,
+                        Grade = null // or set a default grade
+                    };
+
+                context.StudentCourses.Add(studentCourse);
+            }
+
+            await context.SaveChangesAsync();
+
+            // Reload the students list
+            StudentCourses = await context.StudentCourses
+                .Where(course => course.CourseId == Id)
+                .Include(student => student.Student)
+                .ToListAsync();
+            await JS.InvokeVoidAsync("clearSelect2", "studentSelect");
+
+            StateHasChanged(); // Refresh the UI
+        }
+    }
+
+    private async Task RemoveStudent(string studentId)
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        var studentCourse = await context.StudentCourses
+            .Where(sc => sc.StudentId == studentId && sc.CourseId == Id)
+            .FirstOrDefaultAsync();
+
+        if (studentCourse != null)
+        {
+            context.StudentCourses.Remove(studentCourse);
+            await context.SaveChangesAsync();
+
+            // Reload the students list
+            StudentCourses = await context.StudentCourses
+                .Where(course => course.CourseId == Id)
+                .Include(student => student.Student)
+                .ToListAsync();
+
+            StateHasChanged(); // Refresh the UI
+        }
+    }
+}

@@ -1,0 +1,70 @@
+﻿@page "/students/details"
+
+@using Microsoft.EntityFrameworkCore
+@using BlazorApp3.Models
+@using BlazorApp3.Data
+@inject IDbContextFactory<BlazorApp3.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Student Details</PageTitle>
+
+<h1><i class="fa-solid fa-circle-info"></i> Student Details</h1>
+
+<div>
+    @if (student is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-md-6">
+                <dl class="row">
+                    <dt class="col-sm-4">Name:</dt>
+                    <dd class="col-sm-8">@student.Name</dd>
+
+                    <dt class="col-sm-4">Code:</dt>
+                    <dd class="col-sm-8">@student.Code</dd>
+
+                    <dt class="col-sm-4">Phone Number:</dt>
+                    <dd class="col-sm-8">@student.PhoneNumber</dd>
+
+                    <dt class="col-sm-4">Email:</dt>
+                    <dd class="col-sm-8">@student.Email</dd>
+
+                    <dt class="col-sm-4">Address:</dt>
+                    <dd class="col-sm-8">@student.Address</dd>
+
+                    <dt class="col-sm-4">Sex:</dt>
+                    <dd class="col-sm-8">@student.Sex</dd>
+
+                    <dt class="col-sm-4">Role:</dt>
+                    <dd class="col-sm-8">@student.Role</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div>
+            <a class="mx-1 btn btn-outline-success" href="@($"/students/edit?id={student.Id}")">Edit</a>
+            <a class="btn btn-success" href="/students">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private ApplicationUser? student;
+
+    [SupplyParameterFromQuery]
+    public string Id { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        student = await context.ApplicationUser.FirstOrDefaultAsync(u => u.Id == Id && u.Role == "Student");
+
+        if (student is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

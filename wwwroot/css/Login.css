@@ -1,0 +1,176 @@
+﻿/* Toàn bộ body */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f7f9fc;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+h1 {
+    text-align: center;
+    color: #007BFF;
+    font-size: 36px;
+    margin-bottom: 20px;
+}
+
+/* Container đăng nhập */
+.col-md-4 {
+    
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+}
+
+    /* Tiêu đề phụ */
+    .col-md-4 h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #333;
+        font-size: 20px;
+    }
+
+/* Khung input */
+.form-floating {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+/* Nhãn (Label) trong ô input */
+.form-floating label {
+    position: absolute;
+    top: 0px; /* Khoảng cách từ trên xuống của nhãn */
+    left: 0px; /* Khoảng cách từ trái vào của nhãn, điều chỉnh để tránh che biểu tượng */
+    font-size: 14px;
+    color: #777;
+    transition: all 0.2s ease-in-out;
+    pointer-events: none; /* Đảm bảo nhãn không cản trở việc nhập liệu */
+}
+
+/* Ô input */
+.form-floating input {
+    width: 100%;
+    padding: 25px 15px 10px 45px; /* Chú ý đến padding trái để không bị chồng lên biểu tượng */
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+
+    /* Khi người dùng bắt đầu nhập liệu, nhãn sẽ di chuyển lên trên */
+    .form-floating input:focus + label,
+    .form-floating input:not(:placeholder-shown) + label {
+        top: -5px; /* Di chuyển nhãn lên trên khi input có nội dung hoặc đang được focus */
+        left: -5px; /* Điều chỉnh vị trí để nhãn trông hợp lý hơn */
+        font-size: 15px;
+        color: #007BFF;
+    }
+.row {
+    display: flex;
+    justify-content: center;
+    height: 100vh; /* Căn giữa theo chiều dọc */
+}
+/* Thông báo lỗi */
+.text-danger {
+    color: #dc3545;
+    font-size: 14px;
+}
+
+/* Nút đăng nhập */
+button[type="submit"] {
+    width: 100%;
+    padding: 15px;
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background-color 0.3s ease;
+}
+
+    button[type="submit"]:hover {
+        background-color: #0056b3;
+    }
+
+/* Định dạng cho phần dịch vụ khác */
+.col-md-6 {
+    padding: 40px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+}
+
+    .col-md-6 h3 {
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 20px;
+    }
+
+hr {
+    border: none;
+    height: 1px;
+    background-color: #ccc;
+    margin: 20px 0;
+}
+
+.links-container {
+    display: flex;
+    gap: 20px; /* Space between the links */
+    margin: 0;
+    padding: 0;
+}
+
+.link-item {
+    margin: 0;
+}
+    .link-item a {
+        color: #007bff; /* Primary color for links */
+        text-decoration: none; /* Remove underline from links */
+        font-size: 0.875rem; /* Adjust font size (smaller text) */
+    }
+
+        .link-item a:hover {
+            color: #0056b3; /* Darker color on hover */
+        }
+/*xoa gach chan send email*/
+.no-underline {
+    text-decoration: none; /* Remove underline from link */
+    color: #007bff; /* Primary color for links */
+}
+
+    .no-underline:hover {
+        color: #0056b3; /* Darker color on hover */
+    }
+
+
+/* Thiết kế thân thiện với thiết bị di động */
+@media (max-width: 768px) {
+    .row {
+        flex-direction: column;
+        padding: 15px;
+    }
+
+    .col-md-4, .col-md-6 {
+        padding: 15px;
+        margin: 15px 0;
+    }
+
+    h1 {
+        font-size: 28px;
+    }
+
+    .form-floating input {
+        font-size: 14px;
+        padding: 12px;
+    }
+
+    button[type="submit"] {
+        font-size: 16px;
+    }
+}

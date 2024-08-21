@@ -1,0 +1,111 @@
+﻿@page "/lecturers/edit"
+
+@using Microsoft.EntityFrameworkCore
+@using BlazorApp3.Models
+@using BlazorApp3.Data
+@inject IDbContextFactory<BlazorApp3.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1><i class="fa-solid fa-pen-to-square"></i> Edit Lecturer</h1>
+
+@if (lecturer is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-6">
+            <EditForm Model="lecturer" OnValidSubmit="UpdateLecturer">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <input type="hidden" name="lecturer.Id" value="@lecturer.Id" />
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name:</label>
+                    <InputText id="name" @bind-Value="lecturer.Name" class="form-control" />
+                    <ValidationMessage For="() => lecturer.Name" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="code" class="form-label">Code:</label>
+                    <InputText id="code" @bind-Value="lecturer.Code" class="form-control" />
+                    <ValidationMessage For="() => lecturer.Code" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="address" class="form-label">Address:</label>
+                    <InputText id="address" @bind-Value="lecturer.Address" class="form-control" />
+                    <ValidationMessage For="() => lecturer.Address" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="sex" class="form-label">Sex:</label>
+                    <InputText id="sex" @bind-Value="lecturer.Sex" class="form-control" />
+                    <ValidationMessage For="() => lecturer.Sex" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email:</label>
+                    <InputText id="email" @bind-Value="lecturer.Email" class="form-control" />
+                    <ValidationMessage For="() => lecturer.Email" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="phone" class="form-label">Phone Number:</label>
+                    <InputText id="phone" @bind-Value="lecturer.PhoneNumber" class="form-control" />
+                    <ValidationMessage For="() => lecturer.PhoneNumber" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a class="btn btn-success mt-3" href="/lecturers">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    public string Id { get; set; } = string.Empty;
+
+    private ApplicationUser? lecturer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        lecturer = await context.ApplicationUser.FirstOrDefaultAsync(u => u.Id == Id && u.Role == "Lecture");
+
+        if (lecturer is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    public async Task UpdateLecturer()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(lecturer!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!LecturerExists(lecturer!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/lecturers");
+    }
+
+    bool LecturerExists(string id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.ApplicationUser.Any(e => e.Id == id && e.Role == "Lecture");
+    }
+}

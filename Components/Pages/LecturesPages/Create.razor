@@ -1,0 +1,119 @@
+﻿@page "/lecturers/create"
+
+@using Microsoft.EntityFrameworkCore
+@using System.ComponentModel.DataAnnotations
+@using System.Text
+@using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+@using BlazorApp3.Data
+@using BlazorApp3.Models
+@inject IUserStore<ApplicationUser> UserStore
+
+@inject IDbContextFactory<BlazorApp3.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.Authorization
+@inject UserManager<BlazorApp3.Data.ApplicationUser> UserManager
+
+<PageTitle>Create</PageTitle>
+
+<h1><i class="fa-solid fa-square-plus"></i></h1>
+
+<h4>Lecturers</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Lectures"
+                  OnValidSubmit="AddLectures" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+            <div class="mb-3">
+                <label for="name" class="form-label">Name:</label>
+                <InputText id="name" @bind-Value="Lectures.Name" class="form-control" />
+                <ValidationMessage For="() => Lectures.Name" class="text-danger" />
+            </div>
+            <ValidationSummary class="text-danger" />
+            <div class="mb-3">
+                <label for="name" class="form-label">Code:</label>
+                <InputText id="name" @bind-Value="Lectures.Code" class="form-control" />
+                <ValidationMessage For="() => Lectures.Code" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="name" class="form-label">Address:</label>
+                <InputText id="name" @bind-Value="Lectures.Address" class="form-control" />
+                <ValidationMessage For="() => Lectures.Address" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="name" class="form-label">Sex:</label>
+                <InputText id="name" @bind-Value="Lectures.Sex" class="form-control" />
+                <ValidationMessage For="() => Lectures.Sex" class="text-danger" />
+            </div>
+            <ValidationSummary class="text-danger" />
+            <div class="mb-3">
+                <label for="name" class="form-label">Email:</label>
+                <InputText id="name" @bind-Value="Lectures.Email" class="form-control" />
+                <ValidationMessage For="() => Lectures.Email" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="name" class="form-label">Phone:</label>
+                <InputText id="name" @bind-Value="Lectures.PhoneNumber" class="form-control" />
+                <ValidationMessage For="() => Lectures.PhoneNumber" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="name" class="form-label">Password:</label>
+                <InputText id="name" @bind-Value="Lectures.PasswordHash" class="form-control" />
+                <ValidationMessage For="() => Lectures.PasswordHash" class="text-danger" />
+            </div>
+
+
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/lectures">Back to List</a>
+</div>
+
+@code {
+
+    [SupplyParameterFromForm]
+    public BlazorApp3.Data.ApplicationUser Lectures { get; set; } = new();
+
+    // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
+
+    public async Task AddLectures()
+    {
+        var passwordHasher = new Microsoft.AspNetCore.Identity.PasswordHasher<Microsoft.AspNetCore.Identity.IdentityUser>();
+        using var context = DbFactory.CreateDbContext();
+        BlazorApp3.Data.ApplicationUser newStudent = new Data.ApplicationUser()
+            {
+
+                Code = Lectures.Code,
+                Name = Lectures.Name,
+                PhoneNumber = Lectures.PhoneNumber,
+                Address = Lectures.Address,
+                Sex = Lectures.Sex,
+                Email = Lectures.Email,
+                UserName = Lectures.Code,
+                NormalizedEmail = Lectures.Email.ToUpper(),
+                NormalizedUserName = Lectures.Code.ToUpper(),
+                Role = "Lecture",
+                LockoutEnabled = true
+            };
+        await UserStore.SetUserNameAsync(newStudent, Lectures.Email, CancellationToken.None);
+        var emailStore = GetEmailStore();
+        await emailStore.SetEmailAsync(newStudent, Lectures.Email, CancellationToken.None);
+        await UserManager.CreateAsync(newStudent, Lectures.PasswordHash);
+
+        NavigationManager.NavigateTo("/lectures");
+    }
+    private IUserEmailStore<ApplicationUser> GetEmailStore()
+    {
+        if (!UserManager.SupportsUserEmail)
+        {
+            throw new NotSupportedException("The default UI requires a user store with email support.");
+        }
+        return (IUserEmailStore<ApplicationUser>)UserStore;
+    }
+}

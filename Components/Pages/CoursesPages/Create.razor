@@ -1,0 +1,181 @@
+﻿@page "/courses/create"
+
+@using Microsoft.EntityFrameworkCore
+@using BlazorApp3.Models
+@using BlazorApp3.Data
+@inject IDbContextFactory<BlazorApp3.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create Course</PageTitle>
+
+<h1 class="page-title">Create Course</h1>
+
+<h4 class="section-title">Course Details</h4>
+<hr class="divider" />
+
+<div class="container">
+    <EditForm method="post" Model="Courses" OnValidSubmit="AddCourses" FormName="create" Enhance>
+        <DataAnnotationsValidator />
+        <ValidationSummary class="validation-summary" />
+        <div class="row">
+            <!-- Column for basic information -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="name" class="form-label">Name:</label>
+                    <InputText id="name" @bind-Value="Courses.Name" class="form-control" />
+                    <ValidationMessage For="() => Courses.Name" class="text-danger" />
+                </div>
+                <div class="form-group">
+                    <label for="startdate" class="form-label">Start Date:</label>
+                    <InputDate id="startdate" @bind-Value="Courses.StartDate" class="form-control" />
+                    <ValidationMessage For="() => Courses.StartDate" class="text-danger" />
+                </div>
+                <div class="form-group">
+                    <label for="enddate" class="form-label">End Date:</label>
+                    <InputDate id="enddate" @bind-Value="Courses.EndDate" class="form-control" />
+                    <ValidationMessage For="() => Courses.EndDate" class="text-danger" />
+                </div>
+            </div>
+            <!-- Column for selection fields -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="semesterid" class="form-label">Semester:</label>
+                    <InputSelect id="semesterid" @bind-Value="Courses.SemesterId" class="form-control">
+                        @foreach (var semester in Semesters)
+                        {
+                            <option value="@semester.Id">@semester.Name</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="() => Courses.SemesterId" class="text-danger" />
+                </div>
+
+                <div class="form-group">
+                    <label for="lectureid" class="form-label">Lecture:</label>
+                    <InputSelect id="lectureid" @bind-Value="Courses.LectureId" class="form-control">
+                        @foreach (var lecture in Lectures)
+                        {
+                            <option value="@lecture.Id">@lecture.Name</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="() => Courses.LectureId" class="text-danger" />
+                </div>
+
+                <div class="form-group">
+                    <label for="subjectid" class="form-label">Subject:</label>
+                    <InputSelect id="subjectid" @bind-Value="Courses.SubjectId" class="form-control">
+                        @foreach (var subject in Subjects)
+                        {
+                            <option value="@subject.Id">@subject.Name</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="() => Courses.SubjectId" class="text-danger" />
+                </div>
+            </div>
+        </div>
+        <div class="button-group">
+            <button type="submit" class="btn btn-primary btn-submit">Create</button>
+            <a class="btn btn-success btn-back" href="/courses">Back to List</a>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    public Courses Courses { get; set; } = new();
+    public List<ApplicationUser> Lectures { get; set; } = new();
+    public List<Semesters> Semesters { get; set; } = new();
+    public List<Subjects> Subjects { get; set; } = new();
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Lectures = await context.ApplicationUser.ToListAsync();
+        Semesters = await context.Semesters.ToListAsync();
+        Subjects = await context.Subjects.ToListAsync();
+    }
+
+    public async Task AddCourses()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Courses.Add(Courses);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/courses");
+    }
+}
+
+    <style>
+    .page-title {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        color: #3424A8;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        color: #3424A8;
+    }
+
+    .divider {
+        border-top: 2px solid #3424A8;
+        margin-bottom: 1rem;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .col-md-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+        padding: 0 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-label {
+        font-weight: bold;
+    }
+
+    .validation-summary {
+        margin-bottom: 1rem;
+    }
+
+    .button-group {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .btn-submit {
+        font-weight: bold;
+        background-color: #3424A8;
+        border-color: #3424A8;
+        color: #fff;
+    }
+
+        .btn-submit:hover {
+            background-color: #2c1e8e;
+            border-color: #2c1e8e;
+        }
+
+    .btn-back {
+        font-weight: bold;
+        background-color: #28a745;
+        border-color: #28a745;
+        color: #fff;
+    }
+
+        .btn-back:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+
+    </style>

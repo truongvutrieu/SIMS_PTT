@@ -1,0 +1,107 @@
+﻿@page "/Subjects/edit"
+
+@using Microsoft.EntityFrameworkCore
+@using BlazorApp3.Models
+@inject IDbContextFactory<BlazorApp3.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1><i class="fa-solid fa-pen-to-square"></i></h1>
+
+<h4>Subjects</h4>
+<hr />
+@if (Subjects is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Subjects" OnValidSubmit="UpdateSubjects" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <input type="hidden" name="Subjects.Id" value="@Subjects.Id" />
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name:</label>
+                    <InputText id="name" @bind-Value="Subjects.Name" class="form-control" />
+                    <ValidationMessage For="() => Subjects.Name" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+               <label for="majorid" class="form-label">Major:</label>
+               <InputSelect id="majorid" @bind-Value="Subjects.MajorId"class="form-control">
+                   @foreach (var major in Majors)
+                    {
+                        <option value="@major.Id">@major.Name</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => Subjects.MajorId"class="text-danger" />
+           </div>    
+           
+                <div class="mb-3">
+                    <label for="code" class="form-label">Code:</label>
+                    <InputText id="code" @bind-Value="Subjects.Code" class="form-control" />
+                    <ValidationMessage For="() => Subjects.Code" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/subjects">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    public int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    public Subjects? Subjects { get; set; }
+    public List<Majors> Majors { get; set; } = new();
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Subjects ??= await context.Subjects.FirstOrDefaultAsync(m => m.Id == Id);
+        Majors = await context.Majors.ToListAsync();
+        if (Subjects is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more details, see https://aka.ms/RazorPagesCRUD.
+    public async Task UpdateSubjects()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Subjects!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!SubjectsExists(Subjects!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/subjects");
+    }
+
+    bool SubjectsExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Subjects.Any(e => e.Id == id);
+    }
+}

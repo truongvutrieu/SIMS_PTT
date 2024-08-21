@@ -1,0 +1,158 @@
+﻿/* Toàn bộ body */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f7f9fc;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* Tiêu đề chính */
+h1 {
+    text-align: center;
+    color: #007BFF;
+    font-size: 36px;
+    margin-bottom: 10px;
+}
+.centered-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0px 0; /* Khoảng cách phía trên và dưới */
+}
+
+    .centered-content h2 {
+        text-align: center;
+        padding-top: 10px;
+        margin: 0px !important
+    }
+.row {
+    display: flex;
+    justify-content: center;
+    
+    height: 100vh; /* Căn giữa theo chiều dọc */
+}
+
+.col-md-4 {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+}
+
+form {
+    width: 100%;
+}
+
+
+
+/* Tiêu đề phần đăng ký */
+.registration-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Khung input */
+.registration-container .form-floating {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+    /* Nhãn (Label) trong ô input */
+    .registration-container .form-floating label {
+        position: absolute;
+        top: 10px; /* Khoảng cách từ trên xuống của nhãn */
+        left: 15px; /* Khoảng cách từ trái vào của nhãn */
+        font-size: 14px;
+        color: #777;
+        transition: all 0.2s ease-in-out;
+        pointer-events: none; /* Đảm bảo nhãn không cản trở việc nhập liệu */
+    }
+
+    /* Ô input */
+    .registration-container .form-floating input {
+        width: 100%;
+        padding: 25px 15px 10px 15px; /* Chú ý đến padding trên để nhãn không che mất nội dung */
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+    }
+
+        /* Khi người dùng bắt đầu nhập liệu, nhãn sẽ di chuyển lên trên */
+        .registration-container .form-floating input:focus + label,
+        .registration-container .form-floating input:not(:placeholder-shown) + label {
+            top: -10px; /* Di chuyển nhãn lên trên khi input có nội dung hoặc đang được focus */
+            left: 10px; /* Điều chỉnh vị trí để nhãn trông hợp lý hơn */
+            font-size: 12px;
+            color: #007BFF;
+        }
+
+
+.registration-container .text-danger {
+    color: #dc3545;
+    font-size: 14px;
+}
+
+/* Nút đăng ký */
+.registration-container button[type="submit"] {
+    width: 100%;
+    padding: 15px;
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background-color 0.3s ease;
+}
+
+    .registration-container button[type="submit"]:hover {
+        background-color: #0056b3;
+    }
+.registration-container .form-floating .fas {
+    color: #007BFF; /* Màu xanh giống như nút đăng ký */
+}
+/* Định dạng cho phần dịch vụ khác */
+.registration-container section {
+    margin-top: 30px;
+}
+
+    .registration-container section h3 {
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 20px;
+    }
+
+
+    .registration-container .col-md-4 {
+        width: 100%;
+        max-width: 400px;
+    }
+
+.registration-container hr {
+    border: none;
+    height: 1px;
+    background-color: #ccc;
+    margin: 20px 0;
+}
+
+/* Thiết kế thân thiện với thiết bị di động */
+@media (max-width: 768px) {
+    .registration-container {
+        padding: 15px;
+        margin: 30px auto;
+    }
+
+    h1 {
+        font-size: 28px;
+    }
+
+    .registration-container .form-floating input {
+        font-size: 14px;
+        padding: 12px;
+    }
+
+    .registration-container button[type="submit"] {
+        font-size: 16px;
+    }
+}

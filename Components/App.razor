@@ -1,0 +1,31 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <link rel="stylesheet" href="bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="app.css" />
+    <link rel="stylesheet" href="BlazorApp3.styles.css" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="stylesheet" href="lib/font-awesome/css/all.min.css" />
+    <link rel="stylesheet" href="lib/select2/css/select2.min.css" />
+
+    <HeadOutlet />
+</head>
+
+<body>
+    <Routes />
+    <script src="_framework/blazor.web.js"></script>
+    <script src="lib/jquery/jquery.min.js"></script>
+    <script src="lib/select2/js/select2.full.min.js"></script>
+    <script src="main.js?v=@rand"></script>
+
+</body>
+
+</html>
+@code
+{
+    int rand = (new Random()).Next(1,99999999);
+}

@@ -1,0 +1,121 @@
+﻿@page "/students/create"
+
+@using Microsoft.EntityFrameworkCore
+@using System.ComponentModel.DataAnnotations
+@using System.Text
+@using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+@using BlazorApp3.Data
+@inject IUserStore<ApplicationUser> UserStore
+
+@inject IDbContextFactory<BlazorApp3.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.Authorization
+@inject UserManager<BlazorApp3.Data.ApplicationUser> UserManager
+
+<PageTitle>Create</PageTitle>
+
+<h1><i class="fa-solid fa-square-plus"></i></h1>
+
+<h4>Student</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Students"
+                  OnValidSubmit="AddStudents" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+            <div class="mb-3">
+                <label for="name" class="form-label">Name:</label>
+                <InputText id="name" @bind-Value="Students.Name" class="form-control" />
+                <ValidationMessage For="() => Students.Name" class="text-danger" />
+            </div>
+            <ValidationSummary class="text-danger" />
+            <div class="mb-3">
+                <label for="name" class="form-label">Code:</label>
+                <InputText id="name" @bind-Value="Students.Code" class="form-control" />
+                <ValidationMessage For="() => Students.Code" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="name" class="form-label">Phone:</label>
+                <InputText id="name" @bind-Value="Students.PhoneNumber" class="form-control" />
+                <ValidationMessage For="() => Students.PhoneNumber" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="name" class="form-label">Address:</label>
+                <InputText id="name" @bind-Value="Students.Address" class="form-control" />
+                <ValidationMessage For="() => Students.Address" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="name" class="form-label">Sex:</label>
+                <InputText id="name" @bind-Value="Students.Sex" class="form-control" />
+                <ValidationMessage For="() => Students.Sex" class="text-danger" />
+            </div>
+            <ValidationSummary class="text-danger" />
+            <div class="mb-3">
+                <label for="name" class="form-label">Email:</label>
+                <InputText id="name" @bind-Value="Students.Email" class="form-control" />
+                <ValidationMessage For="() => Students.Email" class="text-danger" />
+            </div>
+            
+            <div class="mb-3">
+                <label for="name" class="form-label">Password:</label>
+                <InputText id="name" @bind-Value="Students.PasswordHash" class="form-control" />
+                <ValidationMessage For="() => Students.PasswordHash" class="text-danger" />
+            </div>
+
+
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/departments">Back to List</a>
+</div>
+
+@code {
+
+    [SupplyParameterFromForm]
+    public BlazorApp3.Data.ApplicationUser Students { get; set; } = new();
+
+    // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
+
+    public async Task AddStudents()
+    {
+        var passwordHasher = new Microsoft.AspNetCore.Identity.PasswordHasher<Microsoft.AspNetCore.Identity.IdentityUser>();
+        using var context = DbFactory.CreateDbContext();
+        BlazorApp3.Data.ApplicationUser newStudent = new Data.ApplicationUser()
+        {
+
+            Code = Students.Code,
+            Name = Students.Name,
+            PhoneNumber = Students.PhoneNumber,
+            Address = Students.Address,
+            Sex = Students.Sex,
+            Email = Students.Email,
+            UserName = Students.Code,
+            NormalizedEmail = Students.Email.ToUpper(),
+            NormalizedUserName = Students.Code.ToUpper(),
+            Role = "Student",
+            LockoutEnabled = true
+        };
+        await UserStore.SetUserNameAsync(newStudent, Students.Email, CancellationToken.None);
+        var emailStore = GetEmailStore();
+        await emailStore.SetEmailAsync(newStudent, Students.Email, CancellationToken.None);
+        await UserManager.CreateAsync(newStudent, Students.PasswordHash);
+
+        NavigationManager.NavigateTo("/students");
+    }
+    private IUserEmailStore<ApplicationUser> GetEmailStore()
+    {
+        if (!UserManager.SupportsUserEmail)
+        {
+            throw new NotSupportedException("The default UI requires a user store with email support.");
+        }
+        return (IUserEmailStore<ApplicationUser>)UserStore;
+    }
+}

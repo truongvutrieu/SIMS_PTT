@@ -1,0 +1,65 @@
+﻿@page "/subjects/delete"
+
+@using Microsoft.EntityFrameworkCore
+@using BlazorApp3.Models
+@inject IDbContextFactory<BlazorApp3.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+
+<PageTitle>Delete</PageTitle>
+
+<h1><i class="fa-solid fa-trash"></i></h1>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Subjects</h4>
+    <hr />
+    @if (subjects is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Name</dt>
+            <dd class="col-sm-10">@subjects.Name</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Major</dt>
+            <dd class="col-sm-10">@subjects.Name</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Code</dt>
+            <dd class="col-sm-10">@subjects.Name</dd>
+        </dl>
+        <EditForm method="post" Model="subjects" OnValidSubmit="DeleteSubjects" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(subjects is null)">Delete</button> |
+            <a href="/subjects">Back to List</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    Subjects? subjects;
+
+    [SupplyParameterFromQuery]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        subjects = await context.Subjects.Include(m => m.Major).FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (subjects is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    public async Task DeleteSubjects()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Subjects.Remove(subjects!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/subjects");
+    }
+}

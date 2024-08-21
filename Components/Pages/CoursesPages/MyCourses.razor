@@ -1,0 +1,67 @@
+﻿@page "/courses/my-course"
+
+@using Microsoft.EntityFrameworkCore
+@using BlazorApp3.Models
+@inject IDbContextFactory<BlazorApp3.Data.ApplicationDbContext> DbFactory
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>My Courses</PageTitle>
+
+<h1>My Courses</h1>
+
+@if (Courses != null && Courses.Any())
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Course Name</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Semester</th>
+                <th>Lecture</th>
+                <th>Subject</th>
+                <th>Grade</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var course in Courses)
+            {
+                <tr>
+                    <td>@course.Course.Name</td>
+                    <td>@course.Course.StartDate.ToShortDateString()</td>
+                    <td>@course.Course.EndDate.ToShortDateString()</td>
+                    <td>@course.Course.Semester.Name</td>
+                    <td>@course.Course.Lecture.Name</td>
+                    <td>@course.Course.Subject.Name</td>
+                    <td>@(string.IsNullOrEmpty(course.Grade) ? "Not graded" : course.Grade)</td> 
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p><em>No courses available.</em></p>
+}
+
+@code {
+    public List<StudentCourse> Courses { get; set; } = new();
+    string? studentId;
+    protected override async Task OnInitializedAsync()
+    {
+        studentId = BlazorApp3.Components.Layout.NavMenu.userId;
+
+        using var context = DbFactory.CreateDbContext();
+
+        // Retrieve StudentCourses for the current student
+        Courses = await context.StudentCourses
+                              .Where(sc => sc.StudentId == studentId)
+                              .Include(sc => sc.Course)
+                                  .ThenInclude(c => c.Semester)
+                              .Include(sc => sc.Course)
+                                  .ThenInclude(c => c.Subject)
+                              .Include(sc => sc.Course)
+                                  .ThenInclude(c => c.Lecture)
+                              .ToListAsync();
+    }
+}

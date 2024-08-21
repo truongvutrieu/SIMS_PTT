@@ -1,0 +1,147 @@
+﻿@page "/courses"
+
+@using Microsoft.EntityFrameworkCore
+@using BlazorApp3.Models
+@inject IDbContextFactory<BlazorApp3.Data.ApplicationDbContext> DbFactory
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>Courses</PageTitle>
+
+<h1>Courses</h1>
+
+@if (BlazorApp3.Components.Layout.NavMenu.isAdmin)
+{
+    <p>
+        <a href="courses/create" class="btn btn-custom">Create New Course</a>
+    </p>
+}
+
+<table class="table table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>Course Name</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Semester</th>
+            <th>Lecture</th>
+            <th>Subject</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var course in Courses)
+        {
+            <tr>
+                <td>@course.Name</td>
+                <td>@course.StartDate.ToShortDateString()</td>
+                <td>@course.EndDate.ToShortDateString()</td>
+                <td>@course.Semester.Name</td>
+                <td>@course.Lecture.Name</td>
+                <td>@course.Subject.Name</td>
+                <td>
+                    @if (BlazorApp3.Components.Layout.NavMenu.isAdmin)
+                    {
+                        <div class="action-buttons">
+                            <button class="action-btn edit-btn" onclick="location.href='@($"courses/edit?id={course.Id}")'">Edit</button>
+                            <button class="action-btn details-btn" onclick="location.href='@($"courses/details?id={course.Id}")'">Details</button>
+                            <button class="action-btn delete-btn" onclick="location.href='@($"courses/delete?id={course.Id}")'">Delete</button>
+                            <button class="action-btn assign-btn" onclick="location.href='@($"courses/assign?id={course.Id}")'">Assign Students</button>
+                            <button class="action-btn grade-btn" onclick="location.href='@($"courses/grade?id={course.Id}")'">Add Grades</button>
+                        </div>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<Courses> Courses { get; set; } = new List<Courses>();
+    private bool IsAdmin { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        Courses = await context.Courses
+            .Include(m => m.Semester)
+            .Include(m => m.Subject)
+            .Include(m => m.Lecture)
+            .ToListAsync();
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        IsAdmin = user.Claims.Any(c => c.Type == "Role" && c.Value == "Admin");
+    }
+}
+
+
+        <style>
+    .action-buttons {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .action-btn {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        color: white;
+        white-space: nowrap; /* Prevents text from wrapping */
+        overflow: hidden; /* Ensures text doesn't overflow the button */
+        text-overflow: ellipsis; /* Adds ellipsis when text overflows */
+        text-align: center; /* Centers the text inside the button */
+    }
+
+    .edit-btn {
+        background-color: #007bff;
+        max-width: 80px; /* Adjust this value as needed */
+    }
+
+    .details-btn {
+        background-color: #6c757d;
+        max-width: 80px; /* Adjust this value as needed */
+    }
+
+    .delete-btn {
+        background-color: #dc3545;
+        max-width: 80px; /* Adjust this value as needed */
+    }
+
+    .assign-btn {
+        background-color: #28a745;
+        max-width: 120px; /* Adjust this value if needed */
+    }
+
+    .grade-btn {
+        background-color: #ffc107;
+        max-width: 120px; /* Adjust this value if needed */
+    }
+
+    .action-btn:hover {
+        opacity: 0.9;
+    }
+
+    .btn-custom {
+        background-color: #3424A8;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: background-color 0.3s ease;
+        display: inline-block; /* Ensures the button is treated as an inline element */
+    }
+
+        .btn-custom:hover {
+            background-color: #3f3bb8;
+        }
+
+        </style>
